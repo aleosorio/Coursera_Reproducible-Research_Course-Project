@@ -1,0 +1,25 @@
+---
+title: 'Reproducible Research: Final Project'
+author: "Alejandro Osorio"
+date: "September 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Excecutive Summary
+
+
+## Appendix 1: Getting and Cleaning Data
+
+```{r cars}
+
+```
+
+## Appendix 2: Preliminary Analysis
+
+## Appendix 3: 
+
