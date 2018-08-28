@@ -43,7 +43,46 @@ dataoriginal <- read_csv("repdata%2Fdata%2FStormData.csv")
 which(colSums(is.na(dataoriginal)) == 0)
 ```
 
-Fortunately, 
+Fortunately, almost all variables required by the methodology (see Apendix 1) were complete.  Only 'PROPDMGEXP' and 'CROPDMGEXP' required further analysis. Therefore, the dataset that required further analysis, was:
+
+```{r}
+datafinal <- select(dataoriginal, c(1,2,5,7,8, 23:28))
+```
+
+
+#### 'PROPDMGEXP' and 'CROPDMGEXP' NAs analysis
+
+If NAs in these variables are asociated with a zero value on the 'PROPDMGEXP' and 'CROPDMGEXP' respectively, they would be considered complete (zero times any magnitude is zero).  Therefore:
+
+##### PROPDMGs without magnitudes:
+```{r}
+wrongpropdmg <- with(datafinal, which(is.na(PROPDMGEXP) & PROPDMG != 0))
+wrongpropdmg
+```
+
+So only 76 rows had variable 'PROPDMG' with a non zero value and no magnitude.  These rows were therefore eliminated from the dataset, as follows:
+
+```{r}
+datafinal <- datafinal[-wrongpropdmg,]
+```
+
+##### CROPDMGs without magnitudes:
+
+Likewise, 
+```{r}
+wrongcropdmg <- with(datafinal, which(is.na(CROPDMGEXP) & CROPDMG != 0))
+wrongcropdmg
+```
+
+Eliminating
+```{r}
+datafinal <- datafinal[-wrongcropdmg,]
+```
+
+Final check
+```{r}
+with(datafinal, which((is.na(CROPDMGEXP) & CROPDMG != 0)|is.na(CROPDMGEXP) & CROPDMG != 0))
+```
 
 ## Appendix 2: Preliminary Analysis
 
