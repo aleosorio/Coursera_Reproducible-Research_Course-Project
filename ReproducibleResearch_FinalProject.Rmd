@@ -12,12 +12,38 @@ library(tidyverse)
 
 ## Excecutive Summary
 
+### Results Obtained
 
-## Appendix 1: Getting and Cleaning Data
+## Appendix 1: Methodology
 
-```{r cars}
+### Measuring harm to population health
 
+Harm to population health was quantified through the total number of deceased and injured human beings, caused by each event.  For that purpose, variables 'FATALITIES' and 'INJURIES' were used as total numbers of each type of harm, for each event.
+
+### Measuring economic damage
+
+Economic damage was quantified calculating the total of US Dollars lost due to damaged properties or crops.  Variables 'PROPDMG' and 'CROPDMG' (dimensions of total damage to properties and crops respectivelly), plus 'PROPDMGEXP' and 'COPDMGEXP' (magnitude of the previous dimensions).  Detailed calculations in Appendix 2.
+
+### Final variables required
+
+PENDIENTE
+
+## Appendix 2: Getting and Preparing Dataset
+
+### Reading Data
+```{r cars, cache = TRUE, results = "hide"}
+dataoriginal <- read_csv("repdata%2Fdata%2FStormData.csv")
 ```
+
+### Preparing Dataset
+
+#### Identifying columns without NAs
+
+```{r}
+which(colSums(is.na(dataoriginal)) == 0)
+```
+
+Fortunately, 
 
 ## Appendix 2: Preliminary Analysis
 
