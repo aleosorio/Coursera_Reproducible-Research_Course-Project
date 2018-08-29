@@ -102,18 +102,37 @@ Finally, rows in which either 'PROPDMGEXP' or 'CROPDMGEXP' had values other than
 ```{r}
 wrongdmgexp <- with(datafinal, which(!(PROPDMGEXP %in% c("K", "M", "B", NA)) | !(CROPDMGEXP %in% c("K", "M", "B", NA))))
 datafinal <- datafinal[-wrongdmgexp,]
+length(wrongdmgexp)
 ```
+
+With only the above number of eliminated rows.
 
 #### c. 'EVTYPE' cleaning
 
-When applying a table view of all different types of 'EVTYPE' variables (expecting to obtain no more than a two-digit result), a humongous list was obtained, with almost 1.000 different values:
+Dimensioning number of unique values for this variable:
 ```{r}
-head(table(datafinal$EVTYPE), 15)
+glimpse(unique(datafinal$EVTYPE))
 ```
 
-Just out of the first 15, it was automatically concluded that no standardized values were contained within that variable (ie: 'beach erosion' written three different ways -including one misspelled version-).
+Given the humongous diversity of values (973), a table view was applied in order to get a glipmse of the situation, as follows:
+```{r}
+head(data.frame(table(datafinal$EVTYPE)), 15)
+```
 
+As suspected, just out of the first 15 results it could be concluded that no standardized values were contained within that variable (for example, 'beach erosion' was written three different ways, including one misspelled version).
 
+In order to simplify the unavoidable required value-standartization, unique values with a frecuency of 10 or less, were identified and arranged as follows:
+```{r}
+lowfreqevtype <- datafinal$EVTYPE %>% table() %>% data.frame() %>% filter(., Freq <= 10) %>% arrange(., desc(Freq)) %>% glimpse()
+```
+
+So 814 low frequency value types out of 973, reduced the total number down to 159, involving the following number of rows:
+```{r}
+sum(lowfreqevtype$Freq)
+```
+
+ Eliminating said rows:
+ 
 
 #### d. Creating variables with numeric values for property and crop damage
 
