@@ -30,59 +30,93 @@ PENDIENTE
 
 ## Appendix 2: Getting and Preparing Dataset
 
-### Reading Data
+### 1. Reading Data
 ```{r cars, cache = TRUE, results = "hide"}
 dataoriginal <- read_csv("repdata%2Fdata%2FStormData.csv")
 ```
 
-### Preparing Dataset
+### 2. Preparing Dataset
 
-#### Identifying columns without NAs
+#### a. Subsetting and identifying variables without NAs
 
+The subset that was passed on for further cleaning (variables defined in Apendix 1), was:
 ```{r}
-which(colSums(is.na(dataoriginal)) == 0)
+datafinal <- select(dataoriginal, c(2,5,7,8, 23:28))
 ```
 
-Fortunately, almost all variables required by the methodology (see Apendix 1) were complete.  Only 'PROPDMGEXP' and 'CROPDMGEXP' required further analysis. Therefore, the dataset that required further analysis, was:
-
+Variables without NAs:
 ```{r}
-datafinal <- select(dataoriginal, c(1,2,5,7,8, 23:28))
+which(colSums(is.na(datafinal)) == 0)
 ```
 
+Fortunately, almost all variables required by the methodology (besides 'PROPDMGEXP' and 'CROPDMGEXP') were complete.
 
-#### 'PROPDMGEXP' and 'CROPDMGEXP' NAs analysis
+#### b. 'PROPDMGEXP' and 'CROPDMGEXP' cleaning
 
-If NAs in these variables are asociated with a zero value on the 'PROPDMGEXP' and 'CROPDMGEXP' respectively, they would be considered complete (zero times any magnitude is zero).  Therefore:
+##### First cleaning
 
-##### PROPDMGs without magnitudes:
-```{r}
-wrongpropdmg <- with(datafinal, which(is.na(PROPDMGEXP) & PROPDMG != 0))
-wrongpropdmg
-```
-
-So only 76 rows had variable 'PROPDMG' with a non zero value and no magnitude.  These rows were therefore eliminated from the dataset, as follows:
+These two variables contained NAs.  Now, if NAs in these variables were asociated with a zero value on their corresponding 'PROPDMG' and 'CROPDMG' variables, they were considered complete (zero times any magnitude is zero). Therefore: 
 
 ```{r}
-datafinal <- datafinal[-wrongpropdmg,]
+incompletedmg <- with(datafinal, which((is.na(PROPDMGEXP) & PROPDMG != 0) | (is.na(CROPDMGEXP) & CROPDMG != 0))) 
+incompletedmg
 ```
 
-##### CROPDMGs without magnitudes:
+Only 79 rows had either a 'PROPDMG' or 'CROPDMG' variable with a non zero value and an NA magnitude.  These rows were therefore eliminated from the dataset, as follows:
 
-Likewise, 
 ```{r}
-wrongcropdmg <- with(datafinal, which(is.na(CROPDMGEXP) & CROPDMG != 0))
-wrongcropdmg
+datafinal <- datafinal[-incompletedmg,]
 ```
 
-Eliminating
+Final check:
 ```{r}
-datafinal <- datafinal[-wrongcropdmg,]
+with(datafinal, which((is.na(PROPDMGEXP) & PROPDMG != 0)|is.na(CROPDMGEXP) & CROPDMG != 0))
 ```
 
-Final check
+So no values with NA magnitudes were left.
+
+##### Further cleaning
+
+When preparing to create unique numeric variables for property and crop damage (ie: one '1.000' variable instead of '1' and 'K' variables), the following situation was identified for the magnitudes' values:
+
+PROPDMGEXP:
 ```{r}
-with(datafinal, which((is.na(CROPDMGEXP) & CROPDMG != 0)|is.na(CROPDMGEXP) & CROPDMG != 0))
+table(datafinal$PROPDMGEXP, useNA = "always")
 ```
+
+CROPDMGEXP:
+```{r}
+table(datafinal$CROPDMGEXP, useNA = "always")
+```
+
+So further cleaning was required in order to end up with only "K", "M" or "B" values.
+
+First, lowercase "k" and "m" values were replaced by uppercase values in both variables, as follows:
+```{r}
+datafinal$PROPDMGEXP[which(datafinal$PROPDMGEXP == "m")] <- "M"
+datafinal$CROPDMGEXP[which(datafinal$CROPDMGEXP == "k")] <- "K"
+datafinal$CROPDMGEXP[which(datafinal$CROPDMGEXP == "m")] <- "M"
+```
+
+Finally, rows in which either 'PROPDMGEXP' or 'CROPDMGEXP' had values other than "K", "M", "B" or NA, were eliminated, as follows:
+```{r}
+wrongdmgexp <- with(datafinal, which(!(PROPDMGEXP %in% c("K", "M", "B", NA)) | !(CROPDMGEXP %in% c("K", "M", "B", NA))))
+datafinal <- datafinal[-wrongdmgexp,]
+```
+
+#### c. 'EVTYPE' cleaning
+
+When applying a table view of all different types of 'EVTYPE' variables (expecting to obtain no more than a two-digit result), a humongous list was obtained, with almost 1.000 different values:
+```{r}
+head(table(datafinal$EVTYPE), 15)
+```
+
+Just out of the first 15, it was automatically concluded that no standardized values were contained within that variable (ie: 'beach erosion' written three different ways -including one misspelled version-).
+
+
+
+#### d. Creating variables with numeric values for property and crop damage
+
 
 ## Appendix 2: Preliminary Analysis
 
