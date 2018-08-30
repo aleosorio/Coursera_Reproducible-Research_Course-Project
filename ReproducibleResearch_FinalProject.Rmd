@@ -109,6 +109,8 @@ With only the above number of eliminated rows.
 
 #### c. 'EVTYPE' cleaning
 
+##### Preliminary analysis
+
 Dimensioning number of unique values for this variable:
 ```{r}
 glimpse(unique(datafinal$EVTYPE))
@@ -136,24 +138,56 @@ So 814 low frequency value types out of 973, reduced the total number down to 15
 sum(lowfreqevtype$Freq)
 ```
 
+##### Data cleaning
+
 Eliminating said rows:
 ```{r}
 rowslowevtype <- which(datafinal$EVTYPE %in% lowfreqevtype$.)
 datafinal <- datafinal[-rowslowevtype,]
 ```
 
-Analyzing remaining 'EVTYPE' values, by name:
+At this point, in order to execute a quick standardization with a more suited app, the remaining unique 'EVTYPE' values were inputed into a dataset that was exported as csv file, as follows:
 ```{r}
-datafinal$EVTYPE %>%
-        table() %>%
+evtypevalues <- datafinal$EVTYPE %>%
+        unique() %>%
         data.frame() %>%
         arrange(., desc(.))
+write_csv(evtypevalues, "evtypevalues.csv")
+```
+
+Said file was added a variable with standardized names, which was imported as follows:
+```{r}
+evtypestd <- read_csv2("evtypestd.csv")
+```
+
+Next, an extra variable was created in 'datafinal', with standardized 'EVTYPE' values, as follows:
+```{r}
+datafinal <- left_join(datafinal, evtypestd, by = "EVTYPE")
+```
+
+Finally, checking for NAs:
+```{r}
+sum(is.na(datafinal$EVTYPESTD))
+```
+
+And a final glimpse to the obtained unique values:
+```{r}
+glimpse(unique(datafinal$EVTYPESTD))
 ```
 
 #### d. Creating variables with numeric values for property and crop damage
 
+In order to quantify costs, as mentioned in Appendix 1, unique numeric variables for property and crop damage (ie: one '1.000' variable instead of '1' and 'K' variables) were created as follows:
+```{r}
+datafinal <- mutate(datafinal, PROPDMGVAL = if_else(PROPDMGEXP == "K", PROPDMG * 1000, if_else(PROPDMGEXP == "M", PROPDMG * 1000000, if_else(PROPDMGEXP == "B", PROPDMG * 1000000000, 0))), CROPDMGVAL = if_else(CROPDMGEXP == "K", CROPDMG * 1000, if_else(CROPDMGEXP == "M", CROPDMG * 1000000, if_else(CROPDMGEXP == "B", CROPDMG * 1000000000, 0))))
+```
+
+Additionally, a final variable that added up the total damage value ('PRPODMGVAL' + 'CROPDMGVAL'), was created as follows:
+```{r}
+datafinal <- mutate(datafinal, TOTALDMGVAL = PROPDMGVAL + CROPDMGVAL)
+```
+
+PENDIENTE REEMPLAZAR NAs PARA QUE LA SUMA ANTERIOR FUNCIONE.
 
 ## Appendix 2: Preliminary Analysis
-
-## Appendix 3: 
 
