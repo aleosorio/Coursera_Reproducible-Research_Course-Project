@@ -12,6 +12,8 @@ library(tidyverse)
 
 ## Excecutive Summary
 
+### Data Processing
+
 ### Results Obtained
 
 ## Appendix 1: Methodology
@@ -28,7 +30,7 @@ Economic damage was quantified calculating the total of US Dollars lost due to d
 
 PENDIENTE
 
-## Appendix 2: Getting and Preparing Dataset
+## Appendix 2: Data Processing
 
 ### 1. Reading Data
 ```{r cars, cache = TRUE, results = "hide"}
@@ -177,17 +179,18 @@ glimpse(unique(datafinal$EVTYPESTD))
 
 #### d. Creating variables with numeric values for property and crop damage
 
-In order to quantify costs, as mentioned in Appendix 1, unique numeric variables for property and crop damage (ie: one '1.000' variable instead of '1' and 'K' variables) were created as follows:
+In order to quantify costs, as mentioned in Appendix 1, unique numeric variables ('PROPDMGVAL' and 'CROPDMGVAL') for property and crop damage (ie: one '1.000' variable instead of '1' and 'K' variables), were created as follows:
 ```{r}
-datafinal <- mutate(datafinal, PROPDMGVAL = if_else(PROPDMGEXP == "K", PROPDMG * 1000, if_else(PROPDMGEXP == "M", PROPDMG * 1000000, if_else(PROPDMGEXP == "B", PROPDMG * 1000000000, 0))), CROPDMGVAL = if_else(CROPDMGEXP == "K", CROPDMG * 1000, if_else(CROPDMGEXP == "M", CROPDMG * 1000000, if_else(CROPDMGEXP == "B", CROPDMG * 1000000000, 0))))
+datafinal <- mutate(datafinal, PROPDMGVAL = if_else(PROPDMGEXP == "K", PROPDMG * 1000, if_else(PROPDMGEXP == "M", PROPDMG * 1000000, if_else(PROPDMGEXP == "B", PROPDMG * 1000000000, 0)), 0), CROPDMGVAL = if_else(CROPDMGEXP == "K", CROPDMG * 1000, if_else(CROPDMGEXP == "M", CROPDMG * 1000000, if_else(CROPDMGEXP == "B", CROPDMG * 1000000000, 0)),0))
 ```
 
-Additionally, a final variable that added up the total damage value ('PRPODMGVAL' + 'CROPDMGVAL'), was created as follows:
+Finally, variable 'TOTALDMGVAL' which added both 'PRPODMGVAL' and 'CROPDMGVAL' values, was created as follows:
 ```{r}
 datafinal <- mutate(datafinal, TOTALDMGVAL = PROPDMGVAL + CROPDMGVAL)
 ```
 
-PENDIENTE REEMPLAZAR NAs PARA QUE LA SUMA ANTERIOR FUNCIONE.
+## Appendix 3: Results
 
-## Appendix 2: Preliminary Analysis
+### Most Harmful
 
+### Greatest Economic Concecuences
