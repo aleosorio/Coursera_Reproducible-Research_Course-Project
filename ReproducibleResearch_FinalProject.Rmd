@@ -10,25 +10,64 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-## Excecutive Summary
+## Synopsis
 
-### Data Processing
+Based on the proposed methodology (Appendix 1: Methodology), the obtained datasets (Appendix 2: Data Processing) and the preliminary visualization-based analysis (Appendix 3: Results), the following suggestions can be made with regards to the following questions:
 
-### Results Obtained
+1. Across the United States, which types of events (as indicated in the 'EVTYPE' variable) are most harmful with respect to population health?
+2. Across the United States, which types of events have the greatest economic consequences?
+
+### 1. Most harmful with respect to population health
+
+#### a. Most harmful standalone events
+
+'Tsunamies' have the highest average fatalities (6.5) and injuries (1.7), by event type, followed by 'heat', with 1.3 and 3 respectively (more results in Appendix 3.1).
+
+#### b. Most overall harmful events
+
+'Tornados' have the highest total acumulated fatalities (almost 6,000) and total acumulated injuries (almost 10,000), followed by 'excessive heat', with almost 2,000 total acumulated fatalities and 600 total acumulated injuries (more results in Appendix 3.1).
+
+### 2. Greatest economic consequences
+
+#### a. Most expensive standalone events
+
+'Huricane typhoon' has the highest average 'total damage' per event, costing an average of around 320,000,000 USD per event, followed by 'storm surge', costing an average of around 120,000,000 USD per event.
+
+#### b. Most overall expensive events
+
+The most overall expensive event was of the type 'flood', with an accumulated 'total damage' for the whole recorded period of around 150,000,000,000 USD, and followed by 'hurricane typhoon' with an accumulated 'total damage' of around 85,000,000,000.
 
 ## Appendix 1: Methodology
 
-### Measuring harm to population health
+### 1. Measuring harm to population health
 
-Harm to population health was quantified through the total number of deceased and injured human beings, caused by each event throughout recorded history (one standalone event being more harmful than anoother one, by this standard, doesn't make it more harmful).  For that purpose, variables 'FATALITIES' and 'INJURIES' were used as total numbers of each type of harm, for each event.
+Harm to population health was quantified using the following variables (detailed calculations in Appendix 2.e):
 
-### Measuring economic damage
+1. Average injuries, by event type.
+2. Average fatalities, by event type.
+3. Total number of recorded events, by event type.
+4. Total acumulated injuries, by total number of recorded events, by event type.
+5. Total acumulated fatalities, by total number of recorded events, by event type.
 
-Economic damage was quantified calculating the total of US Dollars lost due to damaged properties or crops, caused by each event throughout recorded history.  Variables 'PROPDMG' and 'CROPDMG' (dimensions of total damage to properties and crops respectivelly), plus 'PROPDMGEXP' and 'COPDMGEXP' (magnitude of the previous dimensions).  Detailed calculations in Appendix 2.
+Most harmful events were identified considering the following two criteria:
 
-### Final variables required
+1. Most harmful standalone events: those with the highest averages of injuries and fatalities.
+2. Most overall harmful events: those with the highest acumulated injuries and fatalities, for the whole recorded period.
 
-PENDIENTE
+### 2. Measuring economic damage
+
+Economic damage was quantified using the following variables (detailed calculations in Appendix 2.e):
+
+1. Average 'property damage' (in USD), by event type.
+2. Average 'crop damage' (in USD), by event type.
+3. Average 'total damage' (in USD, as a sum of previous 1 and 2 variables).
+4. Total number of recorded events, by event type.
+5. Total acumulated 'total damage' (in USD), by total number of recorded events, by event type.
+
+Most economically damaging events were identified considering the following two criteria:
+
+1. Most expensive standalone events: those with the highest averages of 'total damage'.
+2. Most overall expensive events: those with the highest acumulated 'total damage', for the whole recorded period.
 
 ## Appendix 2: Data Processing
 
@@ -189,11 +228,9 @@ Finally, variable 'TOTALDMGVAL' which added both 'PRPODMGVAL' and 'CROPDMGVAL' v
 datafinal <- mutate(datafinal, TOTALDMGVAL = PROPDMGVAL + CROPDMGVAL)
 ```
 
-## Appendix 3: Results
+#### e. Creating final datasets for harmful and economically expensive events
 
-### Most Harmful
-
-#### Dataset
+##### Harmful events' dataset
 
 As said in methodology (Appendix 1), the required final dataset to identify the most harmful events, was built as follows:
 ```{r}
@@ -203,18 +240,7 @@ dataharm <- datafinal %>%
         gather('avgfatal', 'avginjury', 'eventnum', 'totalfatal', 'totalinjury', key = "measure", value = "total")
 ```
 
-#### Plot
-
-```{r, fig.height=12}
-ggplot (data = dataharm, mapping = aes(x = EVTYPESTD, y = total)) +
-        geom_col() +
-        facet_wrap(~ measure, nrow = 5, scales = "free_y") +
-        theme(text = element_text(size=8), axis.text.x = element_text(angle = 70, vjust = 1, hjust=1))
-```
-
-### Greatest Economic Concecuences
-
-#### Dataset
+##### Economic damage's dataset
 
 As said in methodology (Appendix 1), the required final dataset to identify the most economically expensive events, was built as follows:
 ```{r}
@@ -224,7 +250,22 @@ dataecon <- datafinal %>%
         gather('avgprop', 'avgcrop', 'avgtotal', 'eventnum', 'totalecon', key = "measure", value = "total")
 ```
 
-#### Plot
+## Appendix 3: Results
+
+### 1. Most Harmful Events
+
+The following plots show the behaviour of each of the five variables (y axis) required by the methodology (Appendix 1), for each type of event (x axis):
+
+```{r, fig.height=12}
+ggplot (data = dataharm, mapping = aes(x = EVTYPESTD, y = total)) +
+        geom_col() +
+        facet_wrap(~ measure, nrow = 5, scales = "free_y") +
+        theme(text = element_text(size=8), axis.text.x = element_text(angle = 70, vjust = 1, hjust=1))
+```
+
+### 2. Events with Greatest Economic Damage
+
+The following plots show the behaviour of each of the five variables (y axis) required by the methodology (Appendix 1), for each type of event (x axis):
 
 ```{r, fig.height=12}
 ggplot (data = dataecon, mapping = aes(x = EVTYPESTD, y = total)) +
